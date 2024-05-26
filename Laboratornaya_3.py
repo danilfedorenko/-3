@@ -3,14 +3,14 @@ from collections import defaultdict
 
 def start():
     # Ввод данных
-    count_routes = int(input("Введите количество маршрутов: "))
+    count_routes = int(input("Количество маршрутов: "))
     routes = []
 
     for i in range(count_routes):
-        route = list(map(int, input(f"Введите остановки для маршрута {i + 1}, разделенные пробелом: ").split()))
+        route = list(map(int, input(f"Остановки для маршрута {i + 1}: ").split()))
         routes.append(route)
 
-    source, destination = map(int, input("Введите начальную и конечную остановки, разделенные пробелом: ").split())
+    source, destination = map(int, input("Начальная и конечная остановка: ").split())
 
     # Реализация через матрицу
     print("Реализация через матрицу:")
@@ -68,9 +68,9 @@ def matrix_approach(routes, source, destination):
 
     # Вывод лучшего пути и номера автобуса
     best_bus_number = find_best_bus(optimal_path, routes)
-    print("Лучший путь:")
+    print("Кратчайший путь:")
     print(" ".join(map(str, optimal_path)))
-    print(f"\nНомер автобуса: {best_bus_number}")
+    print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
 
 
 def depth_first_search_list(graph, current, destination, current_path, all_paths):
@@ -110,9 +110,9 @@ def linked_list_approach(routes, source, destination):
 
     # Вывод лучшего пути и номера автобуса
     best_bus_number = find_best_bus(optimal_path, routes)
-    print("Лучший путь:")
+    print("Кратчайший путь:")
     print(" ".join(map(str, optimal_path)))
-    print(f"\nНомер автобуса: {best_bus_number}")
+    print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
 
 
 def depth_first_search_built_in(graph, current, destination, current_path, all_paths):
@@ -152,9 +152,9 @@ def built_in_approach(routes, source, destination):
 
     # Вывод лучшего пути и номера автобуса
     best_bus_number = find_best_bus(optimal_path, routes)
-    print("Лучший путь:")
+    print("Кратчайший путь:")
     print(" ".join(map(str, optimal_path)))
-    print(f"\nНомер автобуса: {best_bus_number}")
+    print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
 
 
 def find_best_path(all_paths, routes):
