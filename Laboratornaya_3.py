@@ -1,16 +1,18 @@
 import timeit
-from collections import defaultdict
+from collections import defaultdict, deque
+
 
 def start():
-    # Ввод данных
-    count_routes = int(input("Количество маршрутов: "))
-    routes = []
-
-    for i in range(count_routes):
-        route = list(map(int, input(f"Остановки для маршрута {i + 1}: ").split()))
-        routes.append(route)
-
-    source, destination = map(int, input("Начальная и конечная остановка: ").split())
+    # Задаем данные
+    routes = [
+        [1, 2, 3, 4],
+        [2, 5, 6],
+        [1, 7, 8, 6],
+        [1, 8, 5],
+        [1, 2, 4, 6],
+    ]
+    source = 1
+    destination = 6
 
     # Реализация через матрицу
     print("Реализация через матрицу:")
@@ -23,6 +25,14 @@ def start():
     # Реализация через встроенные структуры
     print("\nРеализация через встроенные структуры:")
     evaluate_time(lambda: built_in_approach(routes, source, destination))
+
+    # Реализация через очередь
+    print("\nРеализация через очередь:")
+    evaluate_time(lambda: bfs_approach(routes, source, destination))
+
+    # Реализация через очередь без использования граф и вершин
+    print("\nРеализация через очередь без использования граф и вершин:")
+    evaluate_time(lambda: basic_queue(routes, source, destination))
 
 
 def evaluate_time(func):
@@ -55,7 +65,6 @@ def matrix_approach(routes, source, destination):
             graph[route[i]][route[i + 1]] = 1
             graph[route[i + 1]][route[i]] = 1
 
-    # Поиск всех путей между парой вершин
     depth_first_search_matrix(graph, source, destination, current_path, all_paths)
 
     # Вывод найденных путей
@@ -73,19 +82,6 @@ def matrix_approach(routes, source, destination):
     print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
 
 
-def depth_first_search_list(graph, current, destination, current_path, all_paths):
-    current_path.append(current)
-
-    if current == destination:
-        all_paths.append(current_path.copy())
-    else:
-        for neighbor in graph[current]:
-            if neighbor not in current_path:
-                depth_first_search_list(graph, neighbor, destination, current_path, all_paths)
-
-    current_path.pop()
-
-
 def linked_list_approach(routes, source, destination):
     graph = defaultdict(list)
     all_paths = []
@@ -97,11 +93,51 @@ def linked_list_approach(routes, source, destination):
             graph[route[i]].append(route[i + 1])
             graph[route[i + 1]].append(route[i])
 
-    # Поиск всех путей между парой вершин
-    depth_first_search_list(graph, source, destination, current_path, all_paths)
+    depth_first_search_linked_list(graph, source, destination, current_path, all_paths)
 
     # Вывод найденных путей
     print("Найденные пути (через связный список):")
+    for path in all_paths:
+        print(" ".join(map(str, path)))
+
+    # Поиск наилучшего пути по условиям задачи
+    optimal_path = find_best_path(all_paths, routes)
+
+    # Вывод лучшего пути и номера автобуса
+    best_bus_number = find_best_bus(optimal_path, routes)
+    print("Кратчайший путь:")
+    print(" ".join(map(str, optimal_path)))
+    print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
+
+
+def depth_first_search_linked_list(graph, current, destination, current_path, all_paths):
+    current_path.append(current)
+
+    if current == destination:
+        all_paths.append(current_path.copy())
+    else:
+        for neighbor in graph[current]:
+            if neighbor not in current_path:
+                depth_first_search_linked_list(graph, neighbor, destination, current_path, all_paths)
+
+    current_path.pop()
+
+
+def built_in_approach(routes, source, destination):
+    graph = defaultdict(set)
+    all_paths = []
+    current_path = []
+
+    # Заполнение графа
+    for route in routes:
+        for i in range(len(route) - 1):
+            graph[route[i]].add(route[i + 1])
+            graph[route[i + 1]].add(route[i])
+
+    depth_first_search_built_in(graph, source, destination, current_path, all_paths)
+
+    # Вывод найденных путей
+    print("Найденные пути (через встроенные структуры):")
     for path in all_paths:
         print(" ".join(map(str, path)))
 
@@ -128,10 +164,9 @@ def depth_first_search_built_in(graph, current, destination, current_path, all_p
     current_path.pop()
 
 
-def built_in_approach(routes, source, destination):
+def bfs_aproach(routes, source, destination):
     graph = defaultdict(list)
     all_paths = []
-    current_path = []
 
     # Заполнение графа
     for route in routes:
@@ -139,11 +174,52 @@ def built_in_approach(routes, source, destination):
             graph[route[i]].append(route[i + 1])
             graph[route[i + 1]].append(route[i])
 
-    # Поиск всех путей между парой вершин
-    depth_first_search_built_in(graph, source, destination, current_path, all_paths)
+    queue = deque([(source, [source])])
+
+    while queue:
+        current, path = queue.popleft()
+        if current == destination:
+            all_paths.append(path)
+        else:
+            for neighbor in graph[current]:
+                if neighbor not in path:
+                    queue.append((neighbor, path + [neighbor]))
 
     # Вывод найденных путей
-    print("Найденные пути (через встроенные структуры):")
+    print("Найденные пути (через очередь):")
+    for path in all_paths:
+        print(" ".join(map(str, path)))
+
+    # Поиск наилучшего пути по условиям задачи
+    optimal_path = find_best_path(all_paths, routes)
+
+    # Вывод лучшего пути и номера автобуса
+    best_bus_number = find_best_bus(optimal_path, routes)
+    print("Кратчайший путь:")
+    print(" ".join(map(str, optimal_path)))
+    print(f"\nАвтобус с кратчайшим путем: {best_bus_number}")
+
+
+def basic_queue(routes, source, destination):
+    all_paths = []
+    queue = deque([(source, [source])])
+
+    while queue:
+        current, path = queue.popleft()
+        if current == destination:
+            all_paths.append(path)
+        else:
+            for route in routes:
+                if current in route:
+                    current_index = route.index(current)
+                    # Check neighbors in the route
+                    if current_index > 0 and route[current_index - 1] not in path:
+                        queue.append((route[current_index - 1], path + [route[current_index - 1]]))
+                    if current_index < len(route) - 1 and route[current_index + 1] not in path:
+                        queue.append((route[current_index + 1], path + [route[current_index + 1]]))
+
+    # Вывод найденных путей
+    print("Найденные пути (через очередь без использования граф и вершин):")
     for path in all_paths:
         print(" ".join(map(str, path)))
 
